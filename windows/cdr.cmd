@@ -1,7 +1,8 @@
 @echo off
-for /f "delims=" %%a in ('git rev-parse --show-toplevel') do set git_root=%%a
-if "%ERRORLEVEL%" neq "0" (
-  goto ret
+for /f "delims=" %%a in ('git rev-parse --show-toplevel') do (
+  if "%ERRORLEVEL%" neq "0" (
+    goto ret
+  )
+  cd %%a
 )
-cd %git_root%
 :ret
