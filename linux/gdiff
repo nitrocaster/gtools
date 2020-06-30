@@ -1,0 +1,30 @@
+#!/bin/bash
+
+print_usage ()
+{
+  echo "gdiff: compare modified git files with difftool"
+  echo "    -h        : show this message"
+  echo "    -c [file] : diff cached (staged) changes"
+  echo "    -p <sha>  : diff exact commit"
+}
+
+if [ "$1" == "-h" ]; then
+  print_usage
+  exit
+fi
+
+if [ "$1" == "-c" ]; then
+  git difftool -y --cached $2
+  exit
+fi
+
+if [ "$1" == "-p" ]; then
+  if [ "$2" != "" ]; then
+    git difftool -y $2~1 $2
+    exit
+  fi
+  print_usage
+  exit
+fi
+
+git difftool -y $1
