@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
 import os
+import platform
 import shutil
 import sys
 
 from os import path
 
 id_files = ['id_rsa', 'id_rsa.pub', '.gitconfig']
-id_root = path.join(os.environ['USERPROFILE'], '.userprofiles')
+home_dir_env = 'USERPROFILE' if platform.system() == 'Windows' else 'HOME'
+id_root = path.join(os.environ[home_dir_env], '.userprofiles')
 status_file = path.join(id_root, 'current_id')
 
 os.system("")
