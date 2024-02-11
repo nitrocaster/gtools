@@ -1,8 +1,5 @@
 #!/bin/bash
 git_root="$(git rev-parse --show-toplevel)"
-ret=$?
-if [ $ret -ne 0 ]; then
-  exit $ret
+if [ $? -eq 0 ]; then
+  cd "$git_root"
 fi
-cd "$git_root"
-exec bash
