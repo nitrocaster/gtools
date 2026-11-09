@@ -7,7 +7,14 @@ import sys
 
 from os import path
 
-id_files = ['id_rsa', 'id_rsa.pub', '.gitconfig']
+def is_id_file(name):
+    return name == '.gitconfig' or (name.startswith('id_') and not name.endswith('.old'))
+
+def list_id_files(d):
+    if not path.isdir(d):
+        return []
+    return [f for f in os.listdir(d) if is_id_file(f) and file_exists(path.join(d, f))]
+
 home_dir_env = 'USERPROFILE' if platform.system() == 'Windows' else 'HOME'
 id_root = path.join(os.environ[home_dir_env], '.userprofiles')
 status_file = path.join(id_root, 'current_id')
@@ -67,25 +74,24 @@ def print_status():
 
 def checkout(new_id):
     # 0. check if new_id exists
-    src = path.join(id_root, new_id, id_files[0])
-    if not file_exists(src):
+    new_dir = path.join(id_root, new_id)
+    if not path.isdir(new_dir):
         print('checkout: no such id')
         sys.exit(1)
     # 1. save current id if exists
     current_id = get_status()
     if current_id:
-        for f in id_files:
-            src = path.join(id_root, f)
-            if os.path.exists(src):
-                dst = path.join(id_root, current_id, f)
-                shutil.copyfile(src, dst)
-                os.remove(src);
-    # 2. checkout new id
-    for f in id_files:
-        src = path.join(id_root, new_id, f)
-        if os.path.exists(src):
-            dst = path.join(id_root, f)
-            shutil.copyfile(src, dst)
+        cur_dir = path.join(id_root, current_id)
+        os.makedirs(cur_dir, exist_ok=True)
+        # profile contents mirror what is currently active
+        for f in list_id_files(cur_dir):
+            os.remove(path.join(cur_dir, f))
+        for f in list_id_files(id_root):
+            shutil.copy2(path.join(id_root, f), path.join(cur_dir, f))
+            os.remove(path.join(id_root, f))
+    # 2. checkout new id: take whatever files the profile has
+    for f in list_id_files(new_dir):
+        shutil.copy2(path.join(new_dir, f), path.join(id_root, f))
     set_status(new_id)
     print('switched to id: ' + new_id)
     return
