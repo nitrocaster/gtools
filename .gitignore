@@ -1,3 +1,4 @@
 # Exclude all dot files except .gitignore
 .*
 !.gitignore
+__pycache__
